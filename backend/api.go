@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"quiz/Config"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,40 +18,39 @@ var err error
 
 //User model
 type User struct {
-	ID    uint   `json:"id"`
-	fname string `json:"fname"`
-	lname string `json:"lname"`
-	// age      uint
-	username string `json:"username"`
-	email    string `json:"email"`
-	password string `json:"password"`
-	admin    bool   `json:"admin"`
+	ID       uint   `json:"id"`
+	Fname    string `json:"fname"`
+	Lname    string `json:"lname"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Admin    bool   `json:"admin"`
 }
 
 type Topics struct {
 	ID    uint   `json:"tid"`
-	topic string `json:"topic"`
+	Topic string `json:"topic"`
 }
 
 type Quiz struct {
 	ID       uint   `json:"tid`
-	topic    string `json:"topic"`
-	num_quiz uint   `json:"qname"`
+	Topic    string `json:"topic"`
+	Num_quiz uint   `json:"qname"`
 }
 
 type Questions struct {
 	ID       uint   `json:"qid"`
-	question string `json:"question"`
-	op1      string `json:"optionA"`
-	op2      string `json:"optionB"`
-	op3      string `json:"optionC"`
-	op4      string `json:"optionD"`
-	ans1     bool   `json:"answerA"`
-	ans2     bool   `json:"answerA"`
-	ans3     bool   `json:"answerA"`
-	ans4     bool   `json:"answerA"`
-	topic    string `json:"topic"`
-	num_quiz uint   `json:"qnum"`
+	Question string `json:"question"`
+	Op1      string `json:"optionA"`
+	Op2      string `json:"optionB"`
+	Op3      string `json:"optionC"`
+	Op4      string `json:"optionD"`
+	Ans1     bool   `json:"answerA"`
+	Ans2     bool   `json:"answerB"`
+	Ans3     bool   `json:"answerC"`
+	Ans4     bool   `json:"answerD"`
+	Topic    string `json:"topic"`
+	Num_quiz uint   `json:"qnum"`
 }
 
 func SignUp(c *gin.Context) {
@@ -59,16 +61,16 @@ func SignUp(c *gin.Context) {
 	db.First(&temp)
 	fmt.Println(temp)
 
-	if err := db.Where("username = ?", user.username).First(&preUser).Error; err == nil {
+	if err := db.Where("username = ?", user.Username).First(&preUser).Error; err == nil {
 		c.Header("access-control-allow-origin", "*")
-		c.JSON(201, gin.H{user.username: "already exists. Try another"})
-	} else if err := db.Where("email = ?", user.email).First(&preUser).Error; err == nil {
+		c.JSON(201, gin.H{user.Username: "already exists. Try another"})
+	} else if err := db.Where("email = ?", user.Email).First(&preUser).Error; err == nil {
 		c.Header("access-control-allow-origin", "*")
-		c.JSON(202, gin.H{user.email: "already exists. Try another"})
+		c.JSON(202, gin.H{user.Email: "already exists. Try another"})
 	} else {
-		user.admin = false
-		hashed, _ := bcrypt.GenerateFromPassword([]byte(user.password), 14)
-		user.password = string(hashed)
+		user.Admin = false
+		hashed, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+		user.Password = string(hashed)
 		db.Create(&user)
 		c.Header("access-control-allow-origin", "*")
 		c.JSON(200, user)
@@ -81,13 +83,13 @@ func Login(c *gin.Context) {
 	c.BindJSON(&user)
 
 	fmt.Println(user)
-	if err := db.Where("username = ?", user.username).First(&preUser).Error; err != nil {
+	if err := db.Where("username = ?", user.Username).First(&preUser).Error; err != nil {
 		c.Header("access-control-allow-origin", "*")
-		c.JSON(201, gin.H{user.username: "doesn't exists."})
+		c.JSON(201, gin.H{user.Username: "doesn't exists."})
 	} else {
-		if err = bcrypt.CompareHashAndPassword([]byte(preUser.password), []byte(user.password)); err != nil {
+		if err = bcrypt.CompareHashAndPassword([]byte(preUser.Password), []byte(user.Password)); err != nil {
 			c.Header("access-control-allow-origin", "*")
-			c.JSON(202, gin.H{user.username: "incorrect password"})
+			c.JSON(202, gin.H{user.Username: "incorrect password"})
 		} else {
 			fmt.Println("aaaaaa")
 			c.Header("access-control-allow-origin", "*")
@@ -109,14 +111,17 @@ func GetTopics(c *gin.Context) {
 }
 
 func main() {
-	db, err = gorm.Open("sqlite3", "test.db")
+	// db, err = gorm.Open("sqlite3", "test.db")
+	// Config.DB, err = gorm.Open("mysql", Config.MySQLDbURL(Config.BuildDBConfig()))
+	Config.DB, err = gorm.Open("postgres", Config.PostgresDbURL(Config.BuildDBConfig()).String())
+	db = Config.DB
 	if err != nil {
 		fmt.Println(err.Error())
 		panic("Failed to connect to database")
 	}
-	defer db.Close()
+	defer Config.DB.Close()
 
-	db.AutoMigrate(&User{}, &Topics{}, &Quiz{}, &Questions{})
+	Config.DB.AutoMigrate(&User{}, &Topics{}, &Quiz{}, &Questions{})
 
 	r := gin.Default()
 	r.POST("/signup", SignUp)
