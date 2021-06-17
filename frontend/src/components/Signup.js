@@ -1,7 +1,4 @@
 import React, {Component} from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-
-import Login from "./Login.js"
 
 class Signup extends Component {
 
@@ -53,9 +50,8 @@ class Signup extends Component {
 
     render() {
         return (
-            <div>
-                <Router>
-                    <div className="App">
+                <div className="App">
+                    <div className="formContainer container">
                     <h1>Signup</h1>
                     {this.state.viewMsg &&
                         <div>
@@ -86,13 +82,7 @@ class Signup extends Component {
                         </div>
                         <button type="submit">Register</button>
                     </form>
-                        <p>Registered Already? <Link to={'/Login'}>Login</Link></p>
-                        <Switch>
-
-                            <Route exact path='/Login' component={Login} />
-                        </Switch>
                     </div>
-                </Router>
             </div>
         )
     }

@@ -6,10 +6,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -24,7 +22,7 @@ type User struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	Admin    bool   `json:"admin"`
+	Tutor    bool   `json:"tutor"`
 }
 
 type Topics struct {
@@ -33,9 +31,9 @@ type Topics struct {
 }
 
 type Quiz struct {
-	ID       uint   `json:"tid`
-	Topic    string `json:"topic"`
-	Num_quiz uint   `json:"qname"`
+	ID    uint   `json:"qid"`
+	Qname uint   `json:"qname"`
+	Topic string `json:"topic"`
 }
 
 type Questions struct {
@@ -68,7 +66,7 @@ func SignUp(c *gin.Context) {
 		c.Header("access-control-allow-origin", "*")
 		c.JSON(202, gin.H{user.Email: "already exists. Try another"})
 	} else {
-		user.Admin = false
+		user.Tutor = false
 		hashed, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 		user.Password = string(hashed)
 		db.Create(&user)
@@ -107,7 +105,17 @@ func GetTopics(c *gin.Context) {
 		c.Header("access-control-allow-origin", "*")
 		c.JSON(200, topic)
 	}
+}
 
+func GetQuizzes(c *gin.Context) {
+	var quizzes []Quiz
+	if err := db.Find(&quizzes).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.Header("access-control-allow-origin", "*")
+		c.JSON(200, quizzes)
+	}
 }
 
 func main() {
@@ -127,7 +135,8 @@ func main() {
 	r.POST("/signup", SignUp)
 	r.POST("/signin/", Login)
 
-	r.GET("/topics", GetTopics)
+	r.GET("/topics/", GetTopics)
+	r.GET("/quizzes/", GetQuizzes)
 
 	r.Use((cors.Default()))
 	r.Run(":8080")

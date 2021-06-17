@@ -35,7 +35,8 @@ class Login extends Component {
                     console.log("hello", json)
                     var user = {
                         username: json.username,
-                        isloggedin: true
+                        isTutor: json.tutor,
+                        isLoggedIn: true
                     };
                     localStorage.setItem('user', JSON.stringify(user));
                     console.log(JSON.parse(localStorage.getItem('user')));
@@ -50,31 +51,32 @@ class Login extends Component {
 
     render() {
 
-        if (JSON.parse(localStorage.getItem('user')).isLoggedIn) return (
-            <h1 align="center">You have successfully logged in</h1>
-        )
+        // if (JSON.parse(localStorage.getItem('user')).isLoggedIn) return (
+        //     <h1 align="center">You have successfully logged in</h1>
+        // )
 
         return (
             <div className="App">
+                <div className="formContainer container">
                     <h1>Login</h1>
 
                     {this.state.submitted &&
                         <div className="error">Login Failed: Check Your Credentials</div>}
 
                     <form name="LogIn" onSubmit={this.onSubmit}>
-
+                        <div className="form-group">
                             <label>Username</label>
                             <input type="text" required name="username"
                             value={this.state.username} onChange={this.onChange} />
-
-
+                        </div>
+                        <div className="form-group">
                             <label>Password</label>
                             <input type="password" required name="password"
                             value={this.state.password} onChange={this.onChange} />
-
+                        </div>
                         <button type="submit">Sign In</button>
                     </form>
-
+                </div>
             </div>
         )
     }
