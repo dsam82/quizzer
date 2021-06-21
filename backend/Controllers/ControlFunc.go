@@ -116,15 +116,14 @@ func CreateQuestion(c *gin.Context) {
 		if isTutor(c.Request.URL.Query().Get("Username")) {
 			if err = Config.DB.Create(&question).Error; err != nil {
 				c.Header("access-control-allow-origin", "*")
-				_ = c.AbortWithError(404, err)
+				c.JSON(202, "Permission Denied")
 			} else {
 				c.Header("access-control-allow-origin", "*")
 				c.JSON(200, "question created successfully")
 			}
 		} else {
-			err := errors.New("permission denied")
 			c.Header("access-control-allow-origin", "*")
-			_ = c.AbortWithError(401, err)
+			c.JSON(201, "Invalid token")
 		}
 	} else {
 		c.Header("access-control-allow-origin", "*")

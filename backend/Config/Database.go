@@ -2,9 +2,8 @@ package Config
 
 import (
 	"fmt"
-	"net/url"
-
 	"github.com/jinzhu/gorm"
+	"net/url"
 )
 
 var DB *gorm.DB
@@ -22,7 +21,7 @@ func BuildDBConfig() *DBConfig {
 		Host:     "localhost",
 		Port:     5432,
 		User:     "postgres",
-		Password: "postgres",
+		Password: "Abh#290799",
 		DBName:   "quizzer",
 	}
 	return &dbConfig
@@ -48,3 +47,4 @@ func PostgresDbURL(conf *DBConfig) *url.URL {
 		RawQuery: (&url.Values{"sslmode": []string{"disable"}}).Encode(),
 	}
 }
+

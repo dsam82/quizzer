@@ -3,10 +3,10 @@ import SignUpLogIn from "./SignUpLogIn";
 import {
     BrowserRouter as Router,
     Switch,
-    Route,
-    Redirect
+    Route
 } from "react-router-dom";
 import Quiz from "./Quiz";
+import Ques from "./Ques";
 
 class App extends Component {
 
@@ -17,18 +17,14 @@ class App extends Component {
     }
 
     checkSession() {
-        if (window.location.pathname !== "/login") {
-            if (localStorage.getItem("Username") === null || localStorage.getItem("Token") === null ) {
+        if (localStorage.getItem("Username") === null || localStorage.getItem("Token") === null ) {
+            if(window.location.pathname !== "/login") {
                 window.location = "http://localhost:3000/login"
-            } else if (window.location.pathname !== "/quiz") {
-                window.location.href = "/quiz"
             }
-        } else if (window.location.pathname !== "/login" && window.location.pathname !== "/quiz") {
-            window.location = "http://localhost:3000/login"
-        } else {
-            if (localStorage.getItem("Username") !== null && localStorage.getItem("Token") !== null ) {
-                window.location = "http://localhost:3000/quiz"
-            }
+        } else if (window.location.pathname === "/login") {
+            window.location = "http://localhost:3000/quiz"
+        } else if (window.location.pathname !== "/quiz" && window.location.pathname !== "/admin") {
+            window.location = "http://localhost:3000/quiz"
         }
     }
 
@@ -38,12 +34,13 @@ class App extends Component {
                 <Switch>
                     {this.checkSession()}
                     <Route path={"/login"}>
-
                         <SignUpLogIn onAuth={this.setUsernameToken}/>
                     </Route>
                     <Route path={"/quiz"}>
-                        {this.checkSession()}
                         <Quiz />
+                    </Route>
+                    <Route path={"/admin"}>
+                        <Ques />
                     </Route>
                 </Switch>
             </Router>
